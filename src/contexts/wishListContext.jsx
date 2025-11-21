@@ -1,18 +1,17 @@
-// src/contexts/wishListContext.jsx
+
 import React, { createContext, useEffect, useState, useContext } from "react";
 import { getWishlist, addToWishlistAPI, removeFromWishlistAPI } from "../services/api";
 import { toast } from "react-toastify";
-import { AuthContext } from "./AuthContext"; // Make sure you have this context providing `user`
+import { AuthContext } from "./AuthContext";
 
 export const WishlistContext = createContext();
 
 export const WishlistProvider = ({ children, localWishlist = [] }) => {
-  const { user } = useContext(AuthContext); // Get logged-in user
+  const { user } = useContext(AuthContext);
   const userId = user?.id;
 
   const [wishList, setWishlist] = useState([]);
 
-  // Merge local wishlist with DB wishlist
   const mergeLocalWithDB = async (dbWishlist) => {
     for (let item of localWishlist) {
       if (!dbWishlist.some((i) => String(i.id) === String(item.id))) {
@@ -25,7 +24,6 @@ export const WishlistProvider = ({ children, localWishlist = [] }) => {
     }
   };
 
-  // Fetch wishlist from DB and merge with local
   const refreshWishlist = async () => {
     if (!userId) {
       setWishlist([]);
@@ -61,7 +59,6 @@ export const WishlistProvider = ({ children, localWishlist = [] }) => {
       category: product.category,
     };
 
-    // Optimistic UI update
     setWishlist((prev) => [...prev, minimalProduct]);
     toast.success("Added to wishlist!");
 
@@ -70,15 +67,12 @@ export const WishlistProvider = ({ children, localWishlist = [] }) => {
     } catch (err) {
       console.error("Failed to add to wishlist:", err);
       toast.error("Failed to add to wishlist");
-      // rollback
       setWishlist((prev) => prev.filter((i) => i.id !== product.id));
     }
   };
 
   const removeFromWishlist = async (productId) => {
     if (!userId) return;
-
-    // Optimistic UI update
     setWishlist((prev) => prev.filter((i) => i.id !== productId));
     toast.info("Removed from wishlist");
 
@@ -87,7 +81,7 @@ export const WishlistProvider = ({ children, localWishlist = [] }) => {
     } catch (err) {
       console.error("Failed to remove wishlist item:", err);
       toast.error("Failed to remove item");
-      await refreshWishlist(); // rollback
+      await refreshWishlist(); 
     }
   };
 

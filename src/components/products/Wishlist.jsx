@@ -1,4 +1,3 @@
-// src/components/products/Wishlist.jsx
 import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { WishlistContext } from "../../contexts/wishListContext";

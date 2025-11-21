@@ -24,7 +24,6 @@ const PaymentForm = () => {
   };
 
   const handlePlaceOrder = async () => {
-    // Basic validation
     if (
       !formData.name ||
       !formData.address ||
@@ -35,8 +34,6 @@ const PaymentForm = () => {
       toast.warning("Please fill all the fields!");
       return;
     }
-
-    // Robust retrieval of logged user (support both 'user' and 'currentUser' keys)
     const stored = localStorage.getItem("user") || localStorage.getItem("currentUser");
     const loggedUser = stored ? JSON.parse(stored) : null;
 
@@ -46,17 +43,13 @@ const PaymentForm = () => {
     }
 
     try {
-      // Get freshest user object from server if possible
       let userData;
       try {
         const resp = await axios.get(`http://localhost:3000/users/${loggedUser.id}`);
         userData = resp.data;
       } catch (e) {
-        // server lookup failed — fall back to local stored
         userData = loggedUser;
       }
-
-      // Build items array
       let items = [];
       if (productFromBuyNow) {
         items = [
@@ -82,23 +75,18 @@ const PaymentForm = () => {
 
       const newOrder = {
         id: Date.now(),
-        userId: String(loggedUser.id), // string to match your db ids
+        userId: String(loggedUser.id),
         items,
         totalAmount: items.reduce((sum, it) => sum + (it.price || 0) * (it.quantity || 1), 0),
         shippingDetails: formData,
         orderDate: new Date().toISOString(),
         status: "Pending",
       };
-
-      // 1) Create top-level order (so admin panel can read /orders)
       try {
         await axios.post("http://localhost:3000/orders", newOrder);
       } catch (err) {
-        // If the /orders endpoint is not present or fails, continue — we still write user.orders.
         console.warn("Warning: could not POST to /orders:", err.message || err);
       }
-
-      // 2) Also add the order into the user's nested orders array (backward compatibility)
       try {
         const updatedOrders = [...(userData.orders || []), newOrder];
         await axios.patch(`http://localhost:3000/users/${loggedUser.id}`, {
@@ -107,8 +95,6 @@ const PaymentForm = () => {
       } catch (err) {
         console.warn("Warning: could not update user.orders:", err.message || err);
       }
-
-      // 3) Clear cart and navigate
       if (!productFromBuyNow && clearCart) clearCart();
 
       toast.success("Order placed successfully!");

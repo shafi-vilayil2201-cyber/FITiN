@@ -4,7 +4,7 @@ import axios from "axios";
 const DEFAULT_TIMEOUT = 10_000; // 10s
 
 // Use environment variable in production, otherwise fall back to localhost for dev.
-export const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3000";
+export const API_BASE = import.meta.env.VITE_API_BASE || "https://github.com/shafi-vilayil2201-cyber/FITiN/blob/main/src/server/db.json";
 
 const api = axios.create({
   baseURL: API_BASE,
